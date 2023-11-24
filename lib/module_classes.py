@@ -4,26 +4,36 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from utils import *
 
+from pint import UnitRegistry
+
+u = UnitRegistry()
+u.define('ev = 1.602176634e-19 joule')
+
 #from numba import njit
 
 @dataclass
 class System:
-    D_a: float = 2.45
+    D_a: float = 2.45 * u.ev
     Delta_a: float = 0.2
-    z0: float = 0.0
-    alpha_a: float = 1.0
-
-    D_m: float = 4.745
+    z0: float = 0.0 * u.angstrom
+    alpha_a: float = 1.0 * u.angstrom**(-1)
+    D_m: float = 4.745 * u.ev
     Delta_m: float = -0.2
-    r0: float = 0.741
-    alpha_m: float = 1.943
+    r0: float = 0.741 * u.angstrom
+    alpha_m: float = 1.943 * u.angstrom**(-1)
 
-    m1: float = 1.00794
-    m2: float = 1.00794
+    m1: float = 1.00794 * u.amu
+    m2: float = 1.00794 * u.amu
     M: float = 0.0
+    mu: float = 0.0
+    k_a: float = 0.0
+    omega_a: float = 0.0
 
     def __post_init__(self):
         self.M = self.m1 + self.m2
+        self.mu = self.m1*self.m2/self.M
+        self.k_a = 2.0*self.D_a*self.alpha_a**2
+        self.omega_a = np.sqrt(self.k_a / self.m1)
 
     def __copy__(self):
         new_obj = self.__class__()
@@ -111,10 +121,10 @@ class Potential(System):
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
 
-    mysys = System(m1=2.0)
+    mysys = System(m1=2.0*u.amu)
     mypot = Potential()
     copy_properties(mysys, mypot)
     print(mypot.m1)
     #mypot.plot_potA_potM(zstart=-1,zstop=10,rstart=-1,rstop=10,n=1000)
-    print(mypot.V(rho=1.0,z=2.0,Z=2.5))
+    print(mypot.V(rho = 1.0 * u.angstrom,z = 2.0 * u.angstrom,Z = 2.5 * u.angstrom))
 
