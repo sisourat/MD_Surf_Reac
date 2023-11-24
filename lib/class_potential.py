@@ -24,10 +24,6 @@ class Potential:
     def __post_init__(self):
         self.M = self.m1 + self.m2
 
-    def test(self):
-        print(self.M,self.m1)
-
-
     def Ua(self,x):
         return self.D_a / (4 * (1 + self.Delta_a)) * (
                 (3 + self.Delta_a) * np.exp(-2 * self.alpha_a * (x - self.z0)) - (2 + 6 * self.Delta_a) * np.exp(
@@ -94,11 +90,10 @@ class Potential:
         plt.legend()
         plt.show()
 
-
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
 
-    mypot = Potential(m1=5.0)
+    mypot = Potential()
     mypot.test()
     mypot.plot(zstart=-1,zstop=10,rstart=-1,rstop=10,n=1000)
 
