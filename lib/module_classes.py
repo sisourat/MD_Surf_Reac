@@ -2,11 +2,12 @@ import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+from utils import *
 
 #from numba import njit
 
 @dataclass
-class Potential:
+class System:
     D_a: float = 2.45
     Delta_a: float = 0.2
     z0: float = 0.0
@@ -23,6 +24,23 @@ class Potential:
 
     def __post_init__(self):
         self.M = self.m1 + self.m2
+
+    def __copy__(self):
+        new_obj = self.__class__()
+        for k, v in vars(self).items():
+            try:
+                setattr(new_obj, k, copy.deepcopy(v))
+            except:
+                pass  # non-pickelable stuff wasn't needed
+
+        return new_obj
+
+    def copy(self):
+        return self.__copy__()
+
+
+@dataclass
+class Potential(System):
 
     def Ua(self,x):
         return self.D_a / (4 * (1 + self.Delta_a)) * (
@@ -59,7 +77,7 @@ class Potential:
     def Vfar_m(self,b):
         return self.Um(b) - np.abs(self.Qm(b))
 
-    def plot(self,zstart,zstop,rstart,rstop,n):
+    def plot_potA_potM(self,zstart,zstop,rstart,rstop,n):
         #plt.rcParams['interactive'] = True  ## ou sinon utiliser show()
 
         z = np.linspace(zstart, zstop, n)
@@ -93,7 +111,10 @@ class Potential:
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
 
+    mysys = System(m1=2.0)
     mypot = Potential()
-    mypot.test()
-    mypot.plot(zstart=-1,zstop=10,rstart=-1,rstop=10,n=1000)
+    copy_properties(mysys, mypot)
+    print(mypot.m1)
+    #mypot.plot_potA_potM(zstart=-1,zstop=10,rstart=-1,rstop=10,n=1000)
+    print(mypot.V(rho=1.0,z=2.0,Z=2.5))
 
