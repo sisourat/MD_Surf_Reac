@@ -13,21 +13,21 @@ u.define('ev = 1.602176634e-19 joule')
 
 @dataclass
 class System:
-    D_a: float = 2.45 * u.ev
-    Delta_a: float = 0.2
-    z0: float = 0.0 * u.angstrom
-    alpha_a: float = 1.0 * u.angstrom**(-1)
-    D_m: float = 4.745 * u.ev
-    Delta_m: float = -0.2
-    r0: float = 0.741 * u.angstrom
-    alpha_m: float = 1.943 * u.angstrom**(-1)
+    D_a : float = 2.45 * u.ev
+    Delta_a : float = 0.2
+    z0 : float = 0.0 * u.angstrom
+    alpha_a : float = 1.0 * u.angstrom**(-1)
+    D_m : float = 4.745 * u.ev
+    Delta_m : float = -0.2
+    r0 : float = 0.741 * u.angstrom
+    alpha_m : float = 1.943 * u.angstrom**(-1)
 
-    m1: float = 1.00794 * u.amu
-    m2: float = 1.00794 * u.amu
-    M: float = 0.0
-    mu: float = 0.0
-    k_a: float = 0.0
-    omega_a: float = 0.0
+    m1 : float = 1.00794 * u.amu
+    m2 : float = 1.00794 * u.amu
+    M : float = 0.0
+    mu : float = 0.0
+    k_a : float = 0.0
+    omega_a : float = 0.0
 
     def __post_init__(self):
         self.M = self.m1 + self.m2
@@ -47,10 +47,6 @@ class System:
 
     def copy(self):
         return self.__copy__()
-
-
-@dataclass
-class Potential(System):
 
     def Ua(self,x):
         return self.D_a / (4 * (1 + self.Delta_a)) * (
@@ -72,7 +68,7 @@ class Potential(System):
                     (1 + 3 * self.Delta_m) * np.exp(-2 * self.alpha_m * (x - self.r0)) - (6 + 2 * self.Delta_m) * np.exp(
                 -self.alpha_m * (x - self.r0)))
 
-    def V(self,rho, z, Z):
+    def pot3d(self,rho, z, Z):
         # rho
         # z = z2 - z1
         # Z = (m1*z1 + m2*z2)/M
@@ -120,11 +116,7 @@ class Potential(System):
 
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
-
     mysys = System(m1=2.0*u.amu)
-    mypot = Potential()
-    copy_properties(mysys, mypot)
-    print(mypot.m1)
-    #mypot.plot_potA_potM(zstart=-1,zstop=10,rstart=-1,rstop=10,n=1000)
-    print(mypot.V(rho = 1.0 * u.angstrom,z = 2.0 * u.angstrom,Z = 2.5 * u.angstrom))
+    mysys.plot_potA_potM(zstart=-1 * u.angstrom, zstop=10 * u.angstrom,rstart=-1 * u.angstrom, rstop=10 * u.angstrom,n=1000)
+    print(mysys.pot3d(rho = 1.0 * u.angstrom,z = 2.0 * u.angstrom,Z = 2.5 * u.angstrom))
 

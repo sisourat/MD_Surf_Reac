@@ -1,4 +1,4 @@
-{
- "D_a":  3.0,
- "Delta_a":  1.0
+{ "potentialA": {"D_a":  2.45, "Delta_a":  0.2, "alpha_a":  1.0 },
+  "potentialM": {"D_m":  4.745, "Delta_m":  -0.2, "alpha_m":  1.943 },
+  "masses": {"m1": 1.00794, "m2": 1.00794}
 }
