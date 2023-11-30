@@ -4,26 +4,23 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from utils import *
 
-from pint import UnitRegistry
-
-u = UnitRegistry()
-u.define('ev = 1.602176634e-19 joule')
+from utils import angtoau, evtoau
 
 #from numba import njit
 
 @dataclass
 class System:
-    D_a : float = 2.45 * u.ev
+    D_a : float = 2.45 * evtoau
     Delta_a : float = 0.2
-    z0 : float = 0.0 * u.angstrom
-    alpha_a : float = 1.0 * u.angstrom**(-1)
-    D_m : float = 4.745 * u.ev
+    z0 : float = 0.0
+    alpha_a : float = 1.0  / angtoau
+    D_m : float = 4.745 * evtoau
     Delta_m : float = -0.2
-    r0 : float = 0.741 * u.angstrom
-    alpha_m : float = 1.943 * u.angstrom**(-1)
+    r0 : float = 0.741 * angtoau
+    alpha_m : float = 1.943  / angtoau
 
-    m1 : float = 1.00794 * u.amu
-    m2 : float = 1.00794 * u.amu
+    m1 : float = 1.00794
+    m2 : float = 1.00794
     M : float = 0.0
     mu : float = 0.0
     k_a : float = 0.0
@@ -116,7 +113,7 @@ class System:
 
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
-    mysys = System(m1=2.0*u.amu)
-    mysys.plot_potA_potM(zstart=-1 * u.angstrom, zstop=10 * u.angstrom,rstart=-1 * u.angstrom, rstop=10 * u.angstrom,n=1000)
-    print(mysys.pot3d(rho = 1.0 * u.angstrom,z = 2.0 * u.angstrom,Z = 2.5 * u.angstrom))
+    mysys = System(m1=2.0)
+    mysys.plot_potA_potM(zstart=-1 , zstop=10 ,rstart=-1 , rstop=10,n=1000)
+    print(mysys.pot3d(rho = 1.0 ,z = 2.0 ,Z = 2.5 ))
 
