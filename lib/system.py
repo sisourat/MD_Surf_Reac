@@ -26,6 +26,8 @@ class System:
     k_a : float = 0.0
     omega_a : float = 0.0
 
+    r_rec : float = 0.0
+
     def __post_init__(self):
         self.M = self.m1 + self.m2
         self.mu = self.m1*self.m2/self.M
