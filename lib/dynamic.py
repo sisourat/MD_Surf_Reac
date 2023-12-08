@@ -1,8 +1,11 @@
+import sys
+
 import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 import scipy.integrate as si
 from dataclasses import dataclass, field
+from icecream import ic
 
 from utils import angtoau, evtoau, fstoau
 
@@ -61,13 +64,13 @@ class Dynamic:
 ############################################################################################################################
 
     @staticmethod
-    def diff_sys(y0, tlist, pot, mu, M, drho, dz, dZ):
+    def diff_sys(y0, tlist, pot, mu, mtot, drho, dz, dZ):
         # Defines the Differential system that will be solved to find the trajectory
         # Takes y0 = (pos,vit) and computes its derivative dy0/dt = (vit,acc)
         rho, z, Z, vrho, vz, vZ = y0
         Arho = -(pot(rho + .5 * drho, z, Z) - pot(rho - .5 * drho, z, Z)) / (mu * drho)
         Az = -(pot(rho, z + .5 * dz, Z) - pot(rho, z - .5 * dz, Z)) / (mu * dz)
-        AZ = -(pot(rho, z, Z + .5 * dZ) - pot(rho, z, Z - .5 * dZ)) / (M * dZ)
+        AZ = -(pot(rho, z, Z + .5 * dZ) - pot(rho, z, Z - .5 * dZ)) / (mtot * dZ)
         return np.array([vrho, vz, vZ, Arho, Az, AZ])
 
 ############################################################################################################################
@@ -78,20 +81,35 @@ class Dynamic:
 
         rho_in = rho_0
         z_in = zp_0 - zt_0
-        Z_in = (sys.m2 * zp_0 + sys.m1 * zt_0) / sys.M
+        Z_in = (sys.mp * zp_0 + sys.mt * zt_0) / sys.mtot
         vrho_in = vrho_0
         vz_in = vzp_0 - vzt_0
-        vZ_in = (sys.m2 * vzp_0 + sys.m1 * vzt_0) / sys.M
+        vZ_in = (sys.mp * vzp_0 + sys.mt * vzt_0) / sys.mtot
+
+        #ic(vzp_0,vzt_0)
+        #ic(rho_in, z_in, Z_in, vrho_in, vz_in, vZ_in)
 
         y0 = np.array([rho_in, z_in, Z_in, vrho_in, vz_in, vZ_in])
-        y = si.odeint(self.diff_sys, y0, t, args=(sys.pot3d, sys.mu, sys.M, dyn.drho, dyn.dz, dyn.dZ))
+        y = si.odeint(self.diff_sys, y0, t, args=(sys.pot3d, sys.mu, sys.mtot, dyn.drho, dyn.dz, dyn.dZ))
+    #   print(y[-1,:])
+
+       # plt.plot(t, y[:, 0], 'b', label='rho(t)')
+       # plt.plot(t, y[:, 1], 'g', label='z(t)')
+       # plt.plot(t, y[:, 2], 'r', label='Z(t)')
+       # plt.legend(loc='best')
+       # plt.xlabel('t')
+       # plt.grid()
+       # plt.show()
+       # sys.exit()
 
         rho, z, Z, vrho, vz, vZ = y.T
-        z1 = Z - (sys.m2 / sys.M) * z
-        z2 = Z + (sys.m1 / sys.M) * z
+        z1 = Z - (sys.mp / sys.mtot) * z
+        z2 = Z + (sys.mt / sys.mtot) * z
         r = np.sqrt(rho * rho + z * z)
 
         r_fin = r[-1]
+        ic(r_fin)
+        #sys.exit()
         if r_fin < sys.r_rec:
             recomb = 1
 
@@ -100,11 +118,11 @@ class Dynamic:
     @staticmethod
     def data_traj(sys, y, t):
         rho, z, Z, vrho, vz, vZ = y.T
-        zt = Z - (sys.m2 / sys.M) * z
-        zp = Z + (sys.m1 / sys.M) * z
+        zt = Z - (sys.mp / sys.mtot) * z
+        zp = Z + (sys.mt / sys.mtot) * z
         r = np.sqrt(rho * rho + z * z)
 
-        eZ = 0.5 * sys.M * vZ * vZ
+        eZ = 0.5 * sys.mtot * vZ * vZ
         er = 0.5 * sys.mu * (vz * vz + vrho * vrho)
         pot = sys.pot3d(rho, z, Z)
 

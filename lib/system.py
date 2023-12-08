@@ -19,9 +19,9 @@ class System:
     r0 : float = 0.741 * angtoau
     alpha_m : float = 1.943  / angtoau
 
-    m1 : float = 1.00794
-    m2 : float = 1.00794
-    M : float = 0.0
+    mt : float = 1.00794
+    mp : float = 1.00794
+    mtot : float = 0.0
     mu : float = 0.0
     k_a : float = 0.0
     omega_a : float = 0.0
@@ -29,10 +29,10 @@ class System:
     r_rec : float = 0.0
 
     def __post_init__(self):
-        self.M = self.m1 + self.m2
-        self.mu = self.m1*self.m2/self.M
+        self.mtot = self.mt + self.mp
+        self.mu = self.mt*self.mp/self.mtot
         self.k_a = 2.0*self.D_a*self.alpha_a**2
-        self.omega_a = np.sqrt(self.k_a / self.m1)
+        self.omega_a = np.sqrt(self.k_a / self.mt)
 
     def __copy__(self):
         new_obj = self.__class__()
@@ -69,12 +69,12 @@ class System:
 
     def pot3d(self,rho, z, Z):
         # rho
-        # z = z2 - z1
-        # Z = (m1*z1 + m2*z2)/M
-        z1 = Z - (self.m2 / self.M) * z
-        z2 = Z + (self.m1 / self.M) * z
+        # z = zp - zt
+        # Z = (mt*zt + mp*zp)/M
+        zt = Z - (self.mp / self.mtot) * z
+        zp = Z + (self.mt / self.mtot) * z
         r = np.sqrt(rho * rho + z * z)
-        return self.Ua(z1) + self.Ua(z2) + self.Um(r) - np.sqrt(self.Qm(r) ** 2 + (self.Qa(z1) + self.Qa(z2)) ** 2 - (self.Qa(z1) + self.Qa(z2)) * self.Qm(r))
+        return self.Ua(zt) + self.Ua(zp) + self.Um(r) - np.sqrt(self.Qm(r) ** 2 + (self.Qa(zt) + self.Qa(zp)) ** 2 - (self.Qa(zt) + self.Qa(zp)) * self.Qm(r))
 
     def Vfar_a(self,z1):
         return self.Ua(z1) - np.abs(self.Qa(z1))
@@ -115,7 +115,7 @@ class System:
 
 # Fit du potential pour trouver la constante de raideur et le fond du puit
 if __name__ == "__main__":
-    mysys = System(m1=2.0)
+    mysys = System(mt=2.0)
     mysys.plot_potA_potM(zstart=-1 , zstop=10 ,rstart=-1 , rstop=10,n=1000)
     print(mysys.pot3d(rho = 1.0 ,z = 2.0 ,Z = 2.5 ))
 

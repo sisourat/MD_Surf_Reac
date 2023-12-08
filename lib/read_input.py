@@ -1,8 +1,7 @@
 import json
-
 import numpy as np
-
 from utils import angtoau, evtoau, fstoau
+from scipy.constants import pi, e, m_u, m_e
 
 def read_input(inputfile):
     # Opening JSON file
@@ -45,15 +44,17 @@ def read_input(inputfile):
 
 # Masses of the atoms
     munit = data['masses']['munit']
-    m1 = data['masses']['m1']
-    m2 = data['masses']['m2']
+    mt = data['masses']['mt'] * m_u / m_e
+    mp = data['masses']['mp'] * m_u / m_e
     if (not munit.lower() == 'amu'):
         raise TypeError("Only amu is allowed for mass unit")
 
     runit = data['sysparam']['runit']
     r_rec = data['sysparam']['r_rec']
+    r0 = data['sysparam']['r0']
     if (runit.lower() == 'angstrom'):
         r_rec = r_rec * angtoau
+        r0 = r0 * angtoau
     elif (not runit.lower() == 'au'):
         raise TypeError("Only angstrom or au are allowed for length unit")
 
@@ -69,8 +70,8 @@ def read_input(inputfile):
         ntraj = int(data['param']['ntraj'])
 
         if (tunit.lower() == 'fs'):
-            tmax = tmax/fstoau
-            dt = dt/fstoau
+            tmax = tmax*fstoau
+            dt = dt*fstoau
         elif (not tunit.lower() == 'au'):
             raise TypeError("Only fs or au are allowed for time unit")
 
@@ -111,7 +112,7 @@ def read_input(inputfile):
 
     return {"D_a":  D_a, "Delta_a":  Delta_m, "alpha_a":  alpha_a,
             "D_m":  D_m, "Delta_m":  Delta_m, "alpha_m":  alpha_m,
-            "m1":   m1, "m2": m2,
+            "mt":   mt, "mp": mp, "r0": r0,
             "tmax": tmax, "dt": dt, "dz": dz, "dZ": dZ, "drho": drho, "ntraj": ntraj,
             "blist": blist, "ecoll": ecoll, "zp_i": zp_i, "tlist": tlist}
 
